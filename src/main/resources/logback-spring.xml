@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<configuration scan="true" scanPeriod="60 seconds" debug="false">
+    <!-- scan : 当此属性设置为true时，配置文件如果发生改变，将会被重新加载，默认值为true。-->
+    <!-- scanPeriod : 设置监测配置文件是否有修改的时间间隔，如果没有给出时间单位，默认单位是毫秒。当scan为true时，此属性生效。默认的时间间隔为1分钟。-->
+    <!-- debug : 当此属性设置为true时，将打印出logback内部日志信息，实时查看logback运行状态。默认值为false。-->
+
+    <!-- 日志存放路径 -->
+    <property name="LOG_PATH" value="./logs"/>
+    <!-- 日志显示名称 -->
+    <property name="PROJECT_NAME" value="vote"/>
+
+    <!-- 控制台输出日志 -->
+    <appender name="CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
+        <!-- 设置输出格式 class="ch.qos.logback.classic.encoder.PatternLayoutEncoder" -->
+        <encoder>
+            <!--格式化输出：%d表示日期，%thread表示线程名，%-5level：日志级别从左显示5个字符宽度 %msg：日志消息，%n是换行符-->
+            <pattern>[%d{yyyy-MM-dd HH:mm:ss.SSS}] [%thread] [%-5level] [%logger{50}] - %msg%n</pattern>
+            <!--设置编码-->
+            <charset>UTF-8</charset>
+        </encoder>
+    </appender>
+
+    <!-- 输出日志到文件 -->
+    <appender name="FILE" class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <!-- <file></file> 注释该属性，使用归档日志名称，避免重命名句柄及权限的错误。 -->
+        <!-- 日志记录器的滚动策略,这里用的是基于大小和时间的滚动策略 -->
+        <rollingPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedRollingPolicy">
+            <!-- 归档日志，每日滚动，进行gzip压缩 -->
+            <fileNamePattern>${LOG_PATH}/${PROJECT_NAME}.%d{yyyy-MM-dd}.%i.log.gz</fileNamePattern>
+            <!-- 归档文件的最大数量，根据归档策略fileNamePattern的%d模式，如果触发则会清理归档文件-->
+            <maxHistory>30</maxHistory>
+            <!-- 每个文件最多为100MB -->
+            <maxFileSize>100MB</maxFileSize>
+            <!-- 归档文件的最大总容量，如果触发则会清理归档文件-->
+            <totalSizeCap>3GB</totalSizeCap>
+        </rollingPolicy>
+        <!-- 日志文件输出格式-->
+        <encoder>
+            <pattern>[%d{yyyy-MM-dd HH:mm:ss.SSS}] [%thread] [%-5level] [%logger:%line] - %msg%n</pattern>
+            <charset>UTF-8</charset>
+        </encoder>
+        <!--在root指定的级别之上再次进行过滤,输出大于等于level,可通过onMatch和onMisMatch来确定只输出某个级别的 -->
+        <!--<filter class="ch.qos.logback.classic.filter.LevelFilter">
+            <level>INFO</level>
+            &lt;!&ndash;接受匹配&ndash;&gt;
+            <onMatch>ACCEPT</onMatch>
+            &lt;!&ndash;拒绝不匹配的&ndash;&gt;
+            <onMismatch>DENY</onMismatch>
+        </filter>-->
+    </appender>
+
+    <!--dev环境中打印到控制台-->
+    <springProfile name="dev">
+        <logger name="com.bruin.vote" level="DEBUG" additivity="false">
+            <appender-ref ref="CONSOLE"/>
+            <appender-ref ref="FILE"/>
+        </logger>
+    </springProfile>
+
+    <!--prod环境中打印到控制台-->
+    <springProfile name="prod">
+        <logger name="com.bruin.vote" level="WARN" additivity="false">
+            <appender-ref ref="CONSOLE"/>
+            <appender-ref ref="FILE"/>
+        </logger>
+    </springProfile>
+
+</configuration>
